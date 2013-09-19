@@ -160,4 +160,14 @@ class Gearman
 
         return $worker;
     }
+
+    /**
+     * Returns the original GearmanClient to expose all available functionality.
+     *
+     * @return \GearmanClient
+     */
+    public function getGearmanClient()
+    {
+        return $this->gearmanClient;
+    }
 }
