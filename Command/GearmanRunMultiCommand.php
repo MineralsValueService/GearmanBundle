@@ -34,9 +34,14 @@ class GearmanRunMultiCommand extends ContainerAwareCommand
                 'The method name of the worker function'
             )
             ->addArgument(
-                'job_names',
+                'job_name',
+                InputArgument::REQUIRED,
+                'The name of the gearman job'
+            )
+            ->addArgument(
+                'additional_job_names',
                 InputArgument::IS_ARRAY,
-                'The names of the gearman job'
+                'The names of additional gearman jobs'
             );
     }
 
@@ -49,7 +54,9 @@ class GearmanRunMultiCommand extends ContainerAwareCommand
     {
         $fqWorkerClass = $input->getArgument('fq_worker_class');
         $method = $input->getArgument('method');
-        $jobNames = $input->getArgument('job_names');
+        $jobName = $input->getArgument('job_name');
+        $jobNames = $input->getArgument('additional_job_names');
+        array_unshift($jobNames, $jobName);
 
         /** @var $gearman \Hautelook\GearmanBundle\Service\Gearman */
         $gearman = $this->getContainer()->get('hautelook_gearman.service.gearman');
