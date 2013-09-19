@@ -56,7 +56,7 @@ class GearmanRunMultiCommand extends ContainerAwareCommand
         /** @var $worker \Hautelook\GearmanBundle\Model\GearmanWorker */
         $worker = $gearman->createWorker($jobNames, $fqWorkerClass, $method, $this->getContainer());
 
-        $jobNamesString = implode(' ,', $jobNames);
+        $jobNamesString = implode(', ', $jobNames);
         $output->writeln("<info>Gearman worker created for $jobNamesString</info>");
 
         try {
