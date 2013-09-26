@@ -11,6 +11,7 @@ use Hautelook\GearmanBundle\Event\BindWorkloadDataEvent;
 use Hautelook\GearmanBundle\Event\GearmanEvents;
 use Hautelook\GearmanBundle\Model\GearmanJobInterface;
 use Hautelook\GearmanBundle\Model\GearmanJobStatus;
+use Hautelook\GearmanBundle\Model\GearmanTaskStatus;
 
 /**
  * @author Baldur Rensch <baldur.rensch@hautelook.com>
@@ -31,6 +32,11 @@ class Gearman
      * @var array<string, array>
      */
     protected $servers;
+
+    /**
+     * @var GearmanTaskStatus
+     */
+    protected $taskResults = array();
 
     /**
      * @param \GearmanClient  $gearmanClient
@@ -153,5 +159,80 @@ class Gearman
         $worker->addCallbackFunction($jobName, $noop);
 
         return $worker;
+    }
+
+    /**
+     * This adds a task to the gearman queue.
+     *
+     * @param GearmanJobInterface $job
+     * @param bool                $background
+     * @param int                 $priority
+     * @param mixed               $context
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function addTask(
+        GearmanJobInterface $job,
+        $background = false,
+        $priority = GearmanJobInterface::PRIORITY_LOW,
+        $context = null
+    ) {
+        $functionToCall = $job->getFunctionName();
+        $workload = $job->getWorkload();
+        $workload = serialize($workload);
+
+        if ($background) {
+            if (GearmanJobInterface::PRIORITY_LOW == $priority) {
+                $this->gearmanClient->addTaskLowBackground($functionToCall, $workload, $context);
+            } elseif (GearmanJobInterface::PRIORITY_NORMAL == $priority) {
+                $this->gearmanClient->addTaskBackground($functionToCall, $workload, $context);
+            } elseif (GearmanJobInterface::PRIORITY_HIGH == $priority) {
+                $this->gearmanClient->addTaskHighBackground($functionToCall, $workload, $context);
+            } else {
+                throw new \InvalidArgumentException("Priority not valid: {$priority}");
+            }
+        } else {
+            $this->gearmanClient->setCompleteCallback(array($this, 'onTaskComplete'));
+            $this->gearmanClient->setExceptionCallback(array($this, 'onTaskException'));
+
+            if (GearmanJobInterface::PRIORITY_LOW == $priority) {
+                $this->gearmanClient->addTaskLow($functionToCall, $workload, $context);
+            } elseif (GearmanJobInterface::PRIORITY_NORMAL == $priority) {
+                $this->gearmanClient->addTask($functionToCall, $workload, $context);
+            } elseif (GearmanJobInterface::PRIORITY_HIGH == $priority) {
+                $this->gearmanClient->addTaskHigh($functionToCall, $workload, $context);
+            } else {
+                throw new \InvalidArgumentException("Priority not valid: {$priority}");
+            }
+        }
+    }
+
+    /**
+     * This resets the taskResults, runs the tasks that have been added and returns their results.
+     *
+     * @return array
+     */
+    public function runTasks()
+    {
+        $this->taskResults = new GearmanTaskStatus();
+        $this->gearmanClient->runTasks();
+
+        return $this->taskResults;
+    }
+
+    /**
+     * @param \GearmanTask $task
+     */
+    public function onTaskComplete(\GearmanTask $task)
+    {
+        $this->taskResults->pushResult($task, true);
+    }
+
+    /**
+     * @param \GearmanTask $task
+     */
+    public function onTaskException(\GearmanTask $task)
+    {
+        $this->taskResults->pushResult($task, false);
     }
 }
