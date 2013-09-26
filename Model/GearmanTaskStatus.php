@@ -50,11 +50,11 @@ class GearmanTaskStatus implements \Iterator
         }
 
         $handle = $task->jobHandle();
-        $results[$handle]['success'] = $success;
-        $results[$handle]['task'] = $task;
+        $this->results[$handle]['success'] = $success;
+        $this->results[$handle]['task'] = $task;
 
         $this->rewind();
-        $this->keys = array_keys($results);
+        $this->keys = array_keys($this->results);
     }
 
     /**
