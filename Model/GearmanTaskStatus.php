@@ -64,7 +64,7 @@ class GearmanTaskStatus implements \Iterator
      */
     public function isSuccessful()
     {
-        return $this->hasErrors;
+        return ($this->hasErrors === true) ? false : true;
     }
 
     /**
