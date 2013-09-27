@@ -27,6 +27,15 @@ class GearmanTaskStatus implements \Iterator
     protected $hasErrors = false;
 
     /** @var int */
+    protected $totalJobs = 0;
+
+    /** @var int */
+    protected $succJobs = 0;
+
+    /** @var int */
+    protected $failedJobs = 0;
+
+    /** @var int */
     protected $pos = 0;
 
     /** @var array */
@@ -45,8 +54,13 @@ class GearmanTaskStatus implements \Iterator
             throw new \InvalidArgumentException("Parameter [success] must be boolean");
         }
 
+        $this->totalJobs++;
+
         if ($hasError === true && $this->hasErrors === false) {
             $this->hasErrors = true;
+            $this->failedJobs++;
+        } else {
+            $this->succJobs++;
         }
 
         $handle = $task->jobHandle();
@@ -65,6 +79,36 @@ class GearmanTaskStatus implements \Iterator
     public function isSuccessful()
     {
         return ($this->hasErrors === true) ? false : true;
+    }
+
+    /**
+     * Getter for the totalJobs property.
+     *
+     * @return int
+     */
+    public function getTotalJobs()
+    {
+        return $this->totalJobs;
+    }
+
+    /**
+     * Getter for the succJobs property.
+     *
+     * @return int
+     */
+    public function getSuccessfulJobs()
+    {
+        return $this->succJobs;
+    }
+
+    /**
+     * Getter for the failedJobs property.
+     *
+     * @return int
+     */
+    public function getFailedJobs()
+    {
+        return $this->failedJobs;
     }
 
     /**
