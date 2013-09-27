@@ -194,6 +194,7 @@ class Gearman
         } else {
             $this->gearmanClient->setCompleteCallback(array($this, 'onTaskComplete'));
             $this->gearmanClient->setExceptionCallback(array($this, 'onTaskException'));
+            $this->gearmanClient->setDataCallback(array($this, 'onTaskData'));
 
             if (GearmanJobInterface::PRIORITY_LOW == $priority) {
                 $this->gearmanClient->addTaskLow($functionToCall, $workload, $context);
@@ -225,7 +226,15 @@ class Gearman
      */
     public function onTaskComplete(\GearmanTask $task)
     {
-        $this->taskResults->pushResult($task, true);
+        $this->taskResults->pushResult($task);
+    }
+
+    /**
+     * @param \GearmanTask $task
+     */
+    public function onTaskData(\GearmanTask $task)
+    {
+        $this->taskResults->pushResult($task);
     }
 
     /**
@@ -233,7 +242,7 @@ class Gearman
      */
     public function onTaskException(\GearmanTask $task)
     {
-        $this->taskResults->pushResult($task, false);
+        $this->taskResults->pushResult($task, true);
     }
 
     /**
