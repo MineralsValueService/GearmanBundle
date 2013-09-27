@@ -36,21 +36,21 @@ class GearmanTaskStatus implements \Iterator
      * Push one result item onto the results array.
      *
      * @param GearmanTask $task
-     * @param bool $success
+     * @param bool $hasError
      * @throws \InvalidArgumentException
      */
-    public function pushResult(GearmanTask $task, $success)
+    public function pushResult(GearmanTask $task, $hasError = false)
     {
-        if (! is_bool($success)) {
+        if (! is_bool($hasError)) {
             throw new \InvalidArgumentException("Parameter [success] must be boolean");
         }
 
-        if ($success === false && $this->hasErrors === false) {
+        if ($hasError === true && $this->hasErrors === false) {
             $this->hasErrors = true;
         }
 
         $handle = $task->jobHandle();
-        $this->results[$handle]['success'] = $success;
+        $this->results[$handle]['hasError'] = $hasError;
         $this->results[$handle]['task'] = $task;
 
         $this->rewind();
