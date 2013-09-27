@@ -88,7 +88,9 @@ class GearmanTaskStatus implements \Iterator
      */
     public function current()
     {
-        return $this->results[$this->pos];
+        $key = $this->keys[$this->pos];
+
+        return $this->results[$key];
     }
 
     /**
