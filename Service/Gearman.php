@@ -3,7 +3,7 @@
 namespace Hautelook\GearmanBundle\Service;
 
 use Hautelook\GearmanBundle\Model\GearmanWorker;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
@@ -24,7 +24,7 @@ class Gearman
     protected $gearmanClient;
 
     /**
-     * @var \Symfony\Component\EventDispatcher\EventDispatcher
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
      */
     protected $dispatcher;
 
@@ -39,11 +39,11 @@ class Gearman
     protected $taskResults = array();
 
     /**
-     * @param \GearmanClient  $gearmanClient
-     * @param EventDispatcher $dispatcher
-     * @param                 $servers
+     * @param \GearmanClient            $gearmanClient
+     * @param EventDispatcherInterface  $dispatcher
+     * @param                           $servers
      */
-    public function __construct(\GearmanClient $gearmanClient, EventDispatcher $dispatcher, $servers)
+    public function __construct(\GearmanClient $gearmanClient, EventDispatcherInterface $dispatcher, $servers)
     {
         $this->gearmanClient = $gearmanClient;
         $this->dispatcher = $dispatcher;
